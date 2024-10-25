@@ -25,4 +25,28 @@ var app = builder.Build();
 
 app.MapDefaultEndpoints();
 
+app.MapGet("/api/db/status", async (CoreContext dbContext) =>
+{
+    try
+    {
+        var canConnect = await dbContext.Database.CanConnectAsync();
+        return Results.Ok(new
+        {
+            Status = canConnect ? "Connected" : "Disconnected",
+            Timestamp = DateTime.UtcNow,
+            Database = dbContext.Database.GetDbConnection().Database,
+            Server = dbContext.Database.GetDbConnection().DataSource
+        });
+    }
+    catch (Exception ex)
+    {
+        return Results.BadRequest(new
+        {
+            Status = "Error",
+            Message = ex.Message,
+            Timestamp = DateTime.UtcNow
+        });
+    }
+});
+
 app.Run();
