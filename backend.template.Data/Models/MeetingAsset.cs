@@ -12,7 +12,6 @@ public class MeetingAsset
     [Column("id")]
     public int Seq { get; set; }
 
-    [ForeignKey("Meeting"), DeleteBehavior(DeleteBehavior.Cascade)]
     [Column("meeting_id"), Required]
     public Guid MeetingId { get; set; }
 

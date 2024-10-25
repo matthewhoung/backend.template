@@ -3,12 +3,7 @@ using Aspire.Hosting;
 var builder = DistributedApplication.CreateBuilder(args);
 
 #region PostgreSQL
-const int port = 5432;
-var password = builder.AddParameter("postgres", secret: true);
-var postgreSql = builder.AddPostgres("postgres", password: password, port: port)
-                        .WithDataVolume("./.containers/database:/var/lib/postgresql/data")
-                        .WithPgAdmin();
-var postgresDb = postgreSql.AddDatabase("backend_template");
+var postgresDb = builder.AddConnectionString("Postgresql");
 #endregion
 
 #region References
