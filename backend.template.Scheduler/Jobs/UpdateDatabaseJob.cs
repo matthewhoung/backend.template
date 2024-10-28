@@ -21,44 +21,59 @@ public class UpdateDatabaseJob
     public async Task<UpdateResult> Execute(CancellationToken cancellationToken = default)
     {
         using var activity = activitySource.StartActivity("DatabaseUpdates Job", ActivityKind.Client);
-        
+
         try
         {
             _logger.LogInformation("Starting database update check");
 
-            // Get pending migrations before updating the database
-            var pendingMigrations = await _dbContext.Database.GetPendingMigrationsAsync(cancellationToken);
-            var pendingList = pendingMigrations.ToList();
+            // Use execution strategy for better resilience
+            var strategy = _dbContext.Database.CreateExecutionStrategy();
 
-            if (!pendingList.Any())
+            return await strategy.ExecuteAsync(async () =>
             {
-                _logger.LogInformation("No pending migrations found, Database is up to date");
-                return new UpdateResult
+                // Get pending migrations before updating the database
+                var pendingMigrations = await _dbContext.Database.GetPendingMigrationsAsync(cancellationToken);
+                var pendingList = pendingMigrations.ToList();
+
+                if (!pendingList.Any())
                 {
-                    Success = true,
-                    Message = "Database is up to date",
-                    AppliedMigrations = Array.Empty<string>(),
-                };
-            }
+                    _logger.LogInformation("No pending migrations found, Database is up to date");
+                    return new UpdateResult
+                    {
+                        Success = true,
+                        Message = "Database is up to date",
+                        AppliedMigrations = Array.Empty<string>(),
+                    };
+                }
 
-            _logger.LogInformation("Found {count} pending migrations: {migrations}",
-                pendingList.Count, string.Join(", ", pendingList));
+                _logger.LogInformation("Found {count} pending migrations: {migrations}",
+                    pendingList.Count, string.Join(", ", pendingList));
 
-            // Execute migrations within 
-            await _dbContext.Database.MigrateAsync(cancellationToken);
+                // Execute migrations within a transaction
+                await using var transaction = await _dbContext.Database.BeginTransactionAsync(cancellationToken);
+                try
+                {
+                    await _dbContext.Database.MigrateAsync(cancellationToken);
+                    await transaction.CommitAsync(cancellationToken);
 
-            return new UpdateResult
-            {
-                Success = true,
-                Message = $"Successfully applied {pendingList.Count} migrations",
-                AppliedMigrations = pendingList.ToArray()
-            };
+                    return new UpdateResult
+                    {
+                        Success = true,
+                        Message = $"Successfully applied {pendingList.Count} migrations",
+                        AppliedMigrations = pendingList.ToArray()
+                    };
+                }
+                catch
+                {
+                    await transaction.RollbackAsync(cancellationToken);
+                    throw;
+                }
+            });
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error occurred during database update");
             activity?.RecordException(ex);
-
             return new UpdateResult
             {
                 Success = false,

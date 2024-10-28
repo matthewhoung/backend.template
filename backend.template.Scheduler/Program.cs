@@ -20,6 +20,7 @@ if (builder.Environment.IsDevelopment())
     {
         logging.AddConsole();
         logging.AddDebug();
+        logging.AddFilter("Microsoft.EntityFrameworkCore.Database.Command", LogLevel.Information);
     });
 }
 
@@ -31,6 +32,7 @@ builder.AddNpgsqlDbContext<CoreContext>("Postgresql", configureDbContextOptions:
             maxRetryCount: 3,
             maxRetryDelay: TimeSpan.FromSeconds(30),
             errorCodesToAdd: null);
+        npgsqlOptions.CommandTimeout(30);
     });
 });
 #endregion
@@ -39,8 +41,19 @@ builder.Services.AddTransient<MigrationJob>();
 builder.Services.AddTransient<UpdateDatabaseJob>();
 builder.Services.AddControllers();
 
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+
 var app = builder.Build();
 
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
 
+app.UseHttpsRedirection();
+app.UseAuthorization();
+app.MapControllers();
 app.MapDefaultEndpoints();
 app.Run();
