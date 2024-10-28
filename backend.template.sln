@@ -11,6 +11,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "backend.template.Core", "ba
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "backend.template.Data", "backend.template.Data\backend.template.Data.csproj", "{96834927-8359-4E13-BD08-11373EF75C08}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "backend.template.Scheduler", "backend.template.Scheduler\backend.template.Scheduler.csproj", "{CD6B51DB-09A1-4B42-B83B-1168EDDA4C93}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +35,10 @@ Global
 		{96834927-8359-4E13-BD08-11373EF75C08}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{96834927-8359-4E13-BD08-11373EF75C08}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{96834927-8359-4E13-BD08-11373EF75C08}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CD6B51DB-09A1-4B42-B83B-1168EDDA4C93}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CD6B51DB-09A1-4B42-B83B-1168EDDA4C93}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CD6B51DB-09A1-4B42-B83B-1168EDDA4C93}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CD6B51DB-09A1-4B42-B83B-1168EDDA4C93}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
